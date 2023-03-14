@@ -42,24 +42,23 @@ impl Default for Sub {
     }
 }
 impl Sub {
-    fn move_straight(&self, direction: &Direction) -> Self {
+    fn move_straight(&mut self, direction: &Direction) -> () {
         match direction {
-            DOWN(num) => Self { vertical: self.vertical + num, ..*self },
-            UP(num) => Self { vertical: self.vertical - num, ..*self },
-            FORWARD(num) => Self { horizontal: self.horizontal + num, ..*self }
-        }
+            DOWN(num) => self.vertical += num,
+            UP(num) => self.vertical -= num,
+            FORWARD(num) => self.horizontal += num,
+        };
     }
 
-    fn move_aim(&self, direction: &Direction) -> Self {
+    fn move_aim(&mut self, direction: &Direction) {
         match direction {
-            DOWN(num) => Self { aim: self.aim + num, ..*self },
-            UP(num) => Self { aim: self.aim - num, ..*self },
-            FORWARD(num) => Self {
-                horizontal: self.horizontal + num,
-                vertical: self.vertical + self.aim * num,
-                ..*self
+            DOWN(num) => self.aim += num,
+            UP(num) => self.aim -= num,
+            FORWARD(num) => {
+                self.horizontal += num;
+                self.vertical += self.aim * num;
             }
-        }
+        };
     }
 
     fn result(&self) -> u32 {
@@ -84,8 +83,11 @@ forward 2";
 
     let (part1, part2) = directions.iter()
         .fold((Sub::default(), Sub::default()),
-              |sub, direction|
-                  (sub.0.move_straight(direction), sub.1.move_aim(direction)));
+              |mut sub, direction| {
+                  sub.0.move_straight(direction);
+                  sub.1.move_aim(direction);
+                  sub
+              });
     println!("{:?}, {}", part1, part1.result());
     println!("{:?}, {}", part2, part2.result());
 }
